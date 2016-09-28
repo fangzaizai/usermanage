@@ -1,0 +1,29 @@
+<!doctype html>
+<title>flask of amf</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon" />
+<div class=page>
+  <h1>Hello {{usrtologin}}</h1>
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+  <div class=metanav style="text-align:right;">
+  {% if not session.logined %}
+    <a href="{{ url_for('login') }}">log in</a>
+  {% else %}
+    <a href="{{ url_for('logout') }}">log out</a>
+  {% endif %}
+  </div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class=flash>
+        {% for category,message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}        
+      </ul>
+    {% endif %}
+  {% endwith %}
+  {% block body %}
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery-1.10.2.js') }}"></script>
+  <script type=text/javascript>var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script>
+  {% endblock %}
+</div>

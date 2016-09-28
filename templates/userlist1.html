@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block body %}
+	{% if session.logined %}
+		<form method=post class=entries>
+			<dl>
+				<dt>用户名:<dd><input type=text size=30 name=addusername0 id="addusername0"><span id='usrnotnull'></span>
+				<dt>密码<dd><input type=password size=30 name=addpassword0 id="ps1"><span id='pswnotnull'></span>
+				<dt>确认密码<dd><input type="password" size=30 name="repassword0" id="ps2"><span id='errorpass'></span>
+				<dt>权限等级<dd><input type=text name="AccessLevel0" id="AccessLevel0"><span>1-4</span>
+				<dd><input type=submit onclick="psvalid()" value=提交>
+			<dl>
+		</form>
+
+		<label style="text-align:center;">用户列表:</label><a href="add.html">添加:</a>
+		<table border="1" cellpadding="5" id="mytable" cellspacing="0">
+		<tr><td>用户名</td><td>密码</td><td>操作</td></tr>
+		{% for user in userlist1 %}
+			<tr>
+				<td id="">{{ user.uaername }}</td>
+				<td>{{ user.password|safe }}</td>
+				<td id="{{ user.uaername }}"><a onclick="DelUser('{{ user.uaername }}')" href="">删除</a></td>
+			</tr>
+		{% endfor%}
+		</table>
+		{% else %}
+		<li><em>log in please</em>
+		{% endif %}
+
+	<script type="text/javascript">
+		function DelUser(uaername){
+			$.ajax({
+				url:$SCRIPT_ROOT + "{{ url_for('del_user') }}",
+				dataType:'json',
+				data:{nameofuser:uaername},
+				type:"POST",
+				success:function(status1){
+					window.alert(status1.result);
+				}
+
+			});
+			}
+		function psvalid(){
+			var chin=/^[u4E00-u9FA5]+$/;
+			var spec=/^[a-zA-Z0-9]+$/;
+			var lev=/^[1-4]+$/;
+			var adusr=document.getElementById('addusername0').value;
+			var adpsw=document.getElementById('ps1').value;
+			var repsw=document.getElementById('ps2').value;
+			var level=document.getElementById('AccessLevel0').value;
+			//default authority
+			if (level == '' || level == null || level == undefined) {
+				level=4;
+			};
+			//not null
+			if (adusr == null || adusr == '' || adusr == undefined){
+				$("#usrnotnull").html("not null here");
+				window.alert('usr not null');
+				return
+			}
+			else if (adpsw == null || adpsw == ''){
+				$("#pswnotnull").html("psw not null");
+				window.alert('not same')
+				return
+			}
+			else if ((!spec.test(adusr)) || (!spec.test(adpsw))) {
+				//$("#usrnotnull").html("number or character");
+				window.alert('number or character');
+				return;
+			}
+			else if (!lev.test(level)) {
+				window.alert('你是故意的么');
+				return;
+			}
+			else if (adpsw != repsw) {
+				$("#errorpass").html("必须与密码相同！");
+				window.alert('not same');
+			}
+			else{
+				$.ajax({
+					url:$SCRIPT_ROOT + "{{ url_for('add_user')}}",
+					dataType:'json',
+					data:{addusername:adusr,addpassword:adpsw,AccessLevel:level},
+					type:"POST",
+					success:function(status2){
+					window.alert(status2.result);
+					return;
+				}
+				});
+				}		
+		}
+	</script>
+	<script type="text/javascript" src="{{ url_for('static', filename='jquery-1.10.2.js')}}"></script>
+  	<script type=text/javascript>$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script>
+
+{% endblock %}
