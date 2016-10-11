@@ -4,10 +4,58 @@
   <form action="{{ url_for('login') }}" method=post>
     <dl>
       <dt>Username:
-      <dd><input type=text name=username>
+      <dd><input id="logusername" type=text name=username>
       <dt>Password:
-      <dd><input type=password name=password>
-      <dd><input type=submit value=Login>
+      <dd><input id="logpassword" type=password name=password>
+      <dd><input onclick="login()" type=submit value=Login>
     </dl>
   </form>
+
+  <script type="text/javascript">
+      function login(){
+        var lgusr=document.getElementById('logusername').value;
+        var lgpsw=document.getElementById('logpassword').value;
+        if ( lgusr== '' || lgusr == null || lgusr == undefined) {
+          window.alert('usr not null');
+          return;        
+      }else{
+          $.ajax({
+            url:$SCRIPT_ROOT + "{{ url_for('login')}}",
+            dataType:'json',
+            data:{username:lgusr,password:lgpsw},
+            type:"POST",
+            success:function(msg){
+              //msg=json.parse(msg);
+              if (msg.result == '1'){
+              	window.alert(msg.result);
+                setCookie(lgusr,lgpsw);
+                return;
+              }else	{
+              	if (msg.result == '2'){
+              		window.alert(msg.result);
+                  return;
+              	}
+              	else if (msg.result == '3'){
+              		window.alert('wrong password');
+              	}
+              	else {
+              		window.alert('something wrong~');
+              	}
+              }
+              }
+          });
+        }
+        }
+
+      function setCookie(userName,passWord){
+      	var d = new Date();
+      	d.setTime(d.getTime()+(24*60*60*1000));
+      	var expires = "expires=" + d.toGMTString();
+      	document.cookie = userName + "=" + passWord + ";" + expires;
+      }   
+  </script>
+  <script type="text/javascript" src="{{ url_for('static', filename='jquery-1.10.2.js')}}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='json2.js')}}"></script>
+  <!--script type="text/javascript" src="{{ url_for('static', filename='JSON.js')}}"></script-->
+  <script type="text/javascript">$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};</script>
 {% endblock %}
